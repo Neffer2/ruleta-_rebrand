@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ruleta Doritos</title>
+    <style>
+        @font-face {
+            font-family: 'main';
+            src: url('assets/ObviouslyDemo-BlackItalic.otf') format('true-type');
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 100vw;
+            height: 100vh;
+            background: url('assets/Background.png') no-repeat center center;
+            background-size: cover;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            font-family: 'main', Arial, sans-serif;
+        }
+
+        .ruleta-container {
+            position: relative;
+            width: 500px;
+            height: 500px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .puntero {
+            position: absolute;
+            top: -52px;
+            height: 594px;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .ruleta-wrapper {
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            width: 600px;
+            height: 600px;
+        }
+
+        .ruleta-wrapper.spinning {
+            cursor: not-allowed;
+        }
+
+        .ruleta {
+            position: absolute;
+            top: 53.4%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            height: 370px;
+            transition: transform 10s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+            z-index: 2;
+        }
+
+        .ruleta-contorno {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            height: 600px;
+            z-index: 1;
+        }
+
+        .letrero {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            height: 700px;
+            z-index: 3;
+            pointer-events: none;
+        }
+
+        .ruleta.spin {
+            animation: spin 10s cubic-bezier(0.17, 0.67, 0.12, 0.99) forwards;
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(3600deg);
+            }
+        }
+
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .popup-overlay.show {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .popup {
+            position: relative;
+            max-width: 700px;
+            width: 90%;
+            animation: scaleIn 0.5s ease;
+        }
+
+        .popup img {
+            width: 100%;
+            height: auto;
+            border-radius: 10px;
+            display: block;
+        }
+
+        .popup-question {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 30px 40px;
+            border-radius: 15px;
+            font-size: 26px;
+            font-weight: bold;
+            color: #ffff;
+            text-align: center;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            max-width: 80%;
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0.5);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #ff4444;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 24px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            transition: background 0.3s ease;
+            z-index: 10;
+        }
+
+        .close-btn:hover {
+            background: #cc0000;
+        }
+
+        .instruction {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: translateX(-50%) scale(1);
+            }
+            50% {
+                transform: translateX(-50%) scale(1.05);
+            }
+        }
+
+        .instruction.hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    
+    <div class="ruleta-container">
+        <img src="assets/Puntero.png" alt="Puntero" class="puntero">
+        <div class="ruleta-wrapper" id="ruletaWrapper">
+            <img src="assets/Ruleta_contorno.png" alt="Contorno" class="ruleta-contorno" id="ruletaContorno">
+            <img src="assets/Ruleta.png" alt="Ruleta" class="ruleta" id="ruleta">
+            <img src="assets/Letrero.png" alt="Letrero" class="letrero"> 
+        </div>
+    </div>
+
+    <!-- .ruleta-contorno -->
+    <div class="popup-overlay" id="popupOverlay">
+        <div class="popup">
+            <button class="close-btn" id="closeBtn">&times;</button>
+            <img src="assets/PopUp.png" alt="PopUp">
+            <div class="popup-question" id="popupQuestion"></div>
+        </div>
+    </div>
+
+    <script>
+        const ruleta = document.getElementById('ruleta');
+        const ruletaContorno = document.getElementById('ruletaContorno');
+        const ruletaWrapper = document.getElementById('ruletaWrapper');
+        const popupOverlay = document.getElementById('popupOverlay');
+        const closeBtn = document.getElementById('closeBtn');
+        const popupQuestion = document.getElementById('popupQuestion');
+        
+        // Lista de 10 preguntas de cultura general
+        const preguntas = [
+            "¿Alguna vez has convertido la cara de tus compañeros en stickers de WhatsApp?",
+            "¿Has archivado chats estratégicamente para que nadie se entere de con quién hablas?",
+            "¿Eres de los que bloquea a sus tías de los estados para evitar comentarios incómodos?",
+            "¿Has quitado tu foto de perfil solo para que la gente note que estás triste?",
+            "¿Se ha convertido ChatGPT en tu consejero emocional de cabecera?",
+            "¿Has aplicado el clásico 'ya me voy a dormir' para luego seguir en línea un buen rato?",
+            "¿Realmente crees que usar un sticker de tu propia cara te hace ver cool?",
+            "¿Has subido una historia diseñada específicamente para que la vea una sola persona?",
+            "¿Alguna vez te has sumergido en el perfil de tu jefe para stalkear su vida privada?",
+            "¿Sueles sacar screenshots de tus conversaciones para enviárselas a tus amigos y analizarlas?",
+            "¿Eres de los que satura las stories con el recap de su viaje a tierra caliente?",
+            "¿Utilizas canciones, frases o notas de Instagram como indirectas para alguien en particular?",
+            "¿Todavía no puedes subir contenido sin usar algún tipo de filtro?",
+            "¿Tienes guardado el contenido de esa persona que te gusta para verlo más tarde?",
+            "¿Te ha pasado que, estando en una cita, le prestas más atención al celular que a la persona que tienes enfrente?"
+        ];
+        
+        let isSpinning = false;
+        let totalRotation = 0;
+
+        ruletaWrapper.addEventListener('click', function() {
+            if (isSpinning) return;
+            
+            isSpinning = true;
+            ruletaWrapper.classList.add('spinning');
+            
+            // Generar rotación aleatoria entre 3600 y 7200 grados (10-20 vueltas)
+            const randomRotation = 3600 + Math.random() * 3600;
+            totalRotation += randomRotation;
+            
+            ruleta.style.transform = `translate(-50%, -50%) rotate(${totalRotation}deg)`;
+            
+            // Después de 10 segundos, mostrar el popup
+            setTimeout(function() {
+                // Seleccionar una pregunta aleatoria
+                const preguntaAleatoria = preguntas[Math.floor(Math.random() * preguntas.length)];
+                popupQuestion.textContent = preguntaAleatoria;
+                
+                popupOverlay.classList.add('show');
+                isSpinning = false;
+                ruletaWrapper.classList.remove('spinning');
+            }, 10000);
+        });
+
+        // Cerrar popup al hacer clic en el botón X
+        closeBtn.addEventListener('click', function() {
+            popupOverlay.classList.remove('show');
+            instruction.classList.remove('hidden');
+        });
+
+        // Cerrar popup al hacer clic fuera de él
+        popupOverlay.addEventListener('click', function(e) {
+            if (e.target === popupOverlay) {
+                popupOverlay.classList.remove('show');
+                instruction.classList.remove('hidden');
+            }
+        });
+    </script>
+</body>
+</html>
