@@ -266,6 +266,9 @@
             "¿Te ha pasado que, estando en una cita, le prestas más atención al celular que a la persona que tienes enfrente?"
         ];
         
+        // Array para controlar las preguntas restantes
+        let preguntasRestantes = [...Array(preguntas.length).keys()]; // [0, 1, 2, 3, ...]
+        
         let isSpinning = false;
         let totalRotation = 0;
 
@@ -283,9 +286,20 @@
             
             // Después de 10 segundos, mostrar el popup
             setTimeout(function() {
-                // Seleccionar una pregunta aleatoria
-                const preguntaAleatoria = preguntas[Math.floor(Math.random() * preguntas.length)];
-                popupQuestion.textContent = preguntaAleatoria;
+                // Si no quedan preguntas, reiniciar el array
+                if (preguntasRestantes.length === 0) {
+                    preguntasRestantes = [...Array(preguntas.length).keys()];
+                }
+                
+                // Seleccionar una pregunta aleatoria de las restantes
+                const indiceAleatorio = Math.floor(Math.random() * preguntasRestantes.length);
+                const indicePregunta = preguntasRestantes[indiceAleatorio];
+                
+                // Eliminar la pregunta seleccionada del array de restantes
+                preguntasRestantes.splice(indiceAleatorio, 1);
+                
+                // Mostrar la pregunta
+                popupQuestion.textContent = preguntas[indicePregunta];
                 
                 popupOverlay.classList.add('show');
                 isSpinning = false;
